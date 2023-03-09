@@ -6,6 +6,7 @@ const Student = sequelize.define('student', {
     type: Sequelize.INTEGER,
     unique: true,
     allowNull: false,
+    autoIncrement: true,
     primaryKey: true,
     validate: {
       notNull: {
@@ -50,6 +51,11 @@ const Student = sequelize.define('student', {
   password: {
     type: Sequelize.STRING,
     allowNull: false
+  },
+  status: {
+    type: Sequelize.ENUM('ACTIVE', 'INACTIVE'),
+    allowNull: false,
+    defaultValue: 'ACTIVE'
   }
 })
 

@@ -6,7 +6,7 @@ exports.getAllStudent = async(req, res) => {
   try{
     if(req.user.isAdmin){
       const result = await Student.findAll({
-        attributes: ['studentId', 'fullName', 'major', 'email']
+        attributes: ['studentId', 'fullName', 'major', 'email', 'status']
       })
       return responseHandler(res, 200, 'Success',result);
     }else{
@@ -38,29 +38,57 @@ exports.addStudent = async(req, res) => {
   try{
     if(!req.user.isAdmin) return responseHandler(res, 403, 'Unauthorized');
     const { fullName, email, major, studentId} = req.body;
-    const [student, created] = await Student.findOrCreate({
-      where: { studentId },
-      defaults: {
-        fullName,
-        email,
-        major,
-        password: await bcrypt.hash(`${fullName.split(' ')[0]}${studentId}`, 8)
-      }
+    // const [student, created] = await Student.findOrCreate({
+    //   where: { studentId },
+    //   defaults: {
+    //     fullName,
+    //     email,
+    //     major,
+    //     password: await bcrypt.hash(`${fullName.split(' ')[0]}${studentId}`, 8)
+    //   }
+    // })
+    const student = await Student.create({
+      fullName,
+      email,
+      major,
+      password: await bcrypt.hash(`${fullName.split(' ')[0]}${studentId}`, 8)
     })
-
-    if(!created) return responseHandler(res, 200, `Student with id ${studentId} exist`);
-    else{
-      return responseHandler(res, 200, 'Success', {student, created})
-    }
+    // if(!created) return responseHandler(res, 200, `Student with id ${studentId} exist`);
+    // else{
+      return responseHandler(res, 200, 'Success', {student})
+    // }
   }catch(err){
     console.log(err);
     return responseHandler(res, 500, err);
   }
 }
 
+exports.updateStudentData = async(req, res) => {
+  try{
+    if(!req.user.isAdmin) return responseHandler(res, 403, 'Unauthorized');
+    const body = req.body;
+    const studentData = await Student.findByPk(parseInt(body.studentId));
+    if(!studentData) return responseHandler(res, 404, 'Data not found');
+    const updateData = {};
+    for(let x in body){
+      if(x !== 'studentId'){
+        updateData[x] = body[x]
+      }
+    }
+    await Student.update(updateData, {
+      where: {
+        studentId: body.studentId
+      }
+    })
+    return responseHandler(res, 500, 'Success', updateData);
+  }catch(err){
+    return responseHandler(res, 500, err);
+  }
+}
+
 exports.deleteStudent = async(req, res) => {
   try{
-    if(!req.user.isAdmin) return responseHandler(res, 403, 'Unauthorized')
+    if(!req.user.isAdmin) return responseHandler(res, 403, 'Unauthorized');
     const { id } = req.params;
     const studentData = await Student.findByPk(parseInt(id));
     if(!studentData) return responseHandler(res, 404, 'Data not found');
