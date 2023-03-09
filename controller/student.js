@@ -77,10 +77,10 @@ exports.updateStudentData = async(req, res) => {
     }
     await Student.update(updateData, {
       where: {
-        studentId: body.studentId
+        studentId: body.studentId,
       }
     })
-    return responseHandler(res, 500, 'Success', updateData);
+    return responseHandler(res, 200, 'Success', updateData);
   }catch(err){
     return responseHandler(res, 500, err);
   }
