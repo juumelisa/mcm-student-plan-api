@@ -1,5 +1,6 @@
 const responseHandler = require("../helpers/responseHandler");
 const Student = require("../models/student");
+const bcrypt = require('bcryptjs');
 
 exports.getAllStudent = async(req, res) => {
   try{
@@ -35,17 +36,24 @@ exports.getStudentDetail = async(req, res) => {
 
 exports.addStudent = async(req, res) => {
   try{
+    if(!req.user.isAdmin) return responseHandler(res, 403, 'Unauthorized');
     const { fullName, email, major, studentId} = req.body;
     const [student, created] = await Student.findOrCreate({
       where: { studentId },
       defaults: {
         fullName,
         email,
-        major
+        major,
+        password: await bcrypt.hash(`${fullName.split(' ')[0]}${studentId}`, 8)
       }
     })
-    return responseHandler(res, 200, 'Success', {student, created})
+
+    if(!created) return responseHandler(res, 200, `Student with id ${studentId} exist`);
+    else{
+      return responseHandler(res, 200, 'Success', {student, created})
+    }
   }catch(err){
-    return responseHandler(res, 500, 'Internal Server Error');
+    console.log(err);
+    return responseHandler(res, 500, err);
   }
 }
