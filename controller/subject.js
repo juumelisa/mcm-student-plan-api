@@ -20,3 +20,16 @@ exports.getSubjectDetail = async(req, res) => {
     return responseHandler(res, 500, err);
   }
 }
+
+exports.addSubject = async(req, res) => {
+  try{
+    if(!req.user.isAdmin) return responseHandler(res, 403, 'Unauthorized');
+    const { code, name, subjectLevel, department, faculty } = req.body;
+    const result = await Subject.create({
+      code, name, subjectLevel, department, faculty
+    })
+    return responseHandler(res, 200, result);
+  }catch(err){
+    return responseHandler(res, 500, err);
+  }
+}

@@ -27,6 +27,11 @@ const StudentPlan = sequelize.define('studyPlan', {
         msg: 'Student Code cannot be empty!',
       },
     }
+  },
+  grade: {
+    type: Sequelize.CHAR,
+    allowNull: false,
+    defaultValue: 'F'
   }
 })
 
