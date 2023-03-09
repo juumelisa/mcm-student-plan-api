@@ -108,8 +108,13 @@ exports.addStudentPlan = async(req, res) => {
         subjectCode
       }
     });
-    if(subjectParticipant.count > 3) return responseHandler(res, 400, 'Out of quota');
-    
+    if(subjectParticipant.count >= 4) return responseHandler(res, 400, 'Out of quota');
+    const studentParticipant = await StudentPlan.findAndCountAll({
+      where: {
+        studentId
+      }
+    });
+    if(studentParticipant.count >= 3) return responseHandler(res, 400, 'Out of quota');
     const [participant, created] = await StudentPlan.findOrCreate({
       where: { studentId, subjectCode },
       defaults: {
