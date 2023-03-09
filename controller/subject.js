@@ -9,3 +9,13 @@ exports.getAllSubject = async(req, res) => {
     return responseHandler(res, 500, 'Internal Server Error');
   }
 }
+
+exports.getSubjectDetail = async(req, res) => {
+  try{
+    const { code } = req.params;
+    const result = await Subject.findByPk(code);
+    if(!result) return responseHandler(res, 404, 'Data not found');
+  }catch(err){
+    return responseHandler(res, 500, err);
+  }
+}

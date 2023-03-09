@@ -41,6 +41,14 @@ const Subject = sequelize.define('subject', {
         msg: 'subjectLevel cannot be empty!',
       },
     },
+  },
+  department: {
+    type: Sequelize.STRING,
+    allowNull: true
+  },
+  faculty: {
+    type: Sequelize.STRING,
+    allowNull: true
   }
 })
 
