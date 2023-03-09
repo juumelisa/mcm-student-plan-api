@@ -4,24 +4,47 @@ const bcrypt = require('bcryptjs');
 const validator = require('validator');
 const inputValidation = require("../helpers/inputValidation");
 const mail = require("../helpers/mail");
+const { Op } = require("sequelize");
 
 exports.getAllStudent = async(req, res) => {
   try{
-    const limit = parseInt(req.body.limit) || 5;
-    const page = parseInt(req.body.page) || 1
     if(req.user.isAdmin){
-      const result = await Student.findAndCountAll({
+      const isValidInput = await inputValidation([], ['status', 'major', 'name', 'limit', 'page'], req.body);
+      if(isValidInput.isError){
+        return responseHandler(res, 400, isValidInput.message);
+      }
+      const { major, status, name, limit, page } = req.body;
+      if(limit && !Number.isInteger(limit)){
+        return responseHandler(res, 400, 'Limit should be an integer');
+      }
+      if(page && !Number.isInteger(page)){
+        return responseHandler(res, 400, 'Page should be an integer');
+      }
+      const filter = {
         attributes: ['studentId', 'fullName', 'major', 'email', 'status'],
-        limit: limit,
-        offset: ((page - 1) * limit)
-      })
-      return responseHandler(res, 200, 'Success', result.rows, {count: result.count, page}) ;
+        limit: limit || limit,
+        offset: ((page - 1) * limit) || 0,
+      }
+      if(major || status || name){
+        filter.where = {}
+        if(major){
+          filter.where.major = major;
+        }
+        if(status){
+          filter.where.status = status;
+        }
+        if(name){
+          filter.where.fullName = {
+            [Op.like]: `%${name.toUpperCase()}%`,
+          };
+        }
+      }
+      const result = await Student.findAndCountAll(filter)
+      return responseHandler(res, 200, 'Success', result.rows, {count: result.count, page: page || 1}) ;
     }else{
       return responseHandler(res, 403, 'Unauthorized');
-
     }
   }catch(err){
-    console.log(err);
     return responseHandler(res, 500, 'Internal Server Error');
   }
 }
@@ -30,9 +53,11 @@ exports.getStudentDetail = async(req, res) => {
   try{
     const { id } = req.params;
     if(!id) return responseHandler(res, 400, 'Required: id');
-    console.log(req.user.studentId)
+    if(id.length < 2) return responseHandler(res, 400, 'Invalid id length');
     if(req.user.studentId !== parseInt(id) && !req.user.isAdmin) return responseHandler(res, 403, 'Unauthorized');
-    const result = await Student.findByPk(id);
+    const result = await Student.findByPk(id, {
+      attributes: ['studentId', 'fullName', 'email', 'major', 'status', 'createdAt', 'updatedAt']
+    });
     console.log(result);
     if(!result) return responseHandler(res, 404, 'Student not found');
     return responseHandler(res, 200, result);
@@ -50,7 +75,7 @@ exports.addStudent = async(req, res) => {
       return responseHandler(res, 400, isValidInput.message);
     }
     const { fullName, email, major} = req.body;
-    if(!validator.isAlpha(fullName, ['en-US'], {ignore: " ."})) return responseHandler(res, 400, 'Name should be alphanumeric');
+    if(!validator.isAlpha(fullName, ['en-US'], {ignore: " ."})) return responseHandler(res, 400, 'Name should be string characters contain alphabet and/or space and dot(.)');
     if(!validator.isEmail(email)) return responseHandler(res, 400, 'Wrong email format');
     const randomNumber = Math.floor(Math.random() * (9999 - 1000)) + 1000;
     const student = await Student.create({
@@ -94,6 +119,7 @@ exports.updateStudentData = async(req, res) => {
       return responseHandler(res, 400, isValidInput.message);
     }
     if(body.fullName && !validator.isAlpha(body.fullName, ['en-US'], {ignore: " ."})) return responseHandler(res, 400, 'Name should only containe alphanumeric characters or dot(.)');
+    if(body.email && !validator.isEmail(body.email)) return responseHandler(res, 400, 'Wrong email format');
     const studentData = await Student.findByPk(parseInt(body.studentId));
     if(!studentData) return responseHandler(res, 404, 'Data not found');
     const updateData = {};

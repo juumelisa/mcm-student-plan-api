@@ -32,6 +32,7 @@ exports.studentLogin = async(req, res) => {
       return responseHandler(res, 400, isValidInput.message);
     }
     const { email, password } = req.body;
+    if(password.length < 6) return responseHandler(res, 400, 'Minimum password length is 6 characters');
     if(!validator.isEmail(email)) return responseHandler(res, 400, 'Wrong email format');
     const studentData = await Student.findOne({where: {email}});
     if(!studentData) return responseHandler(res, 400, 'Wrong credentials');
@@ -40,6 +41,7 @@ exports.studentLogin = async(req, res) => {
     const authData = {
       isAdmin: false,
       studentId: studentData.studentId,
+      major: studentData.major,
       TTL: parseInt(new Date().getTime()/1000) + 86400
     }
     const token = jwt.sign(authData, process.env.APP_SECRET);
@@ -57,7 +59,7 @@ exports.studentChangePassword = async(req, res) => {
       return responseHandler(res, 400, isValidInput.message);
     }
     if(!validator.isEmail(body.email)) return responseHandler(res, 400, 'Wrong email format');
-    if(!validator.isStrongPassword(body.newPassword, { minLength: 8, minLowercase: 1, minUppercase: 1, minNumbers: 1, minSymbols: 0 })) return responseHandler(res, 400, 'Password should contain 8 characters or more, combine uppercase, lowercase & number')
+    if(!validator.isStrongPassword(body.newPassword, { minLength: 6, minLowercase: 1, minUppercase: 1, minNumbers: 1, minSymbols: 0 })) return responseHandler(res, 400, 'Password should contain 6 characters or more, combine uppercase, lowercase & number')
     if(body.newPassword !== body.repeatNewPassword) return responseHandler(res, 400, 'Password not match');
     const studentData = await Student.findOne({where: {email: body.email}});
     if(!studentData) return responseHandler(res, 400, 'Wrong credentials');
@@ -92,7 +94,7 @@ exports.resetPassword = async(req, res) => {
     if(!studentId) return responseHandler(res, 400, 'Requires: studentId');
     const studentData = await Student.findByPk(studentId);
     if(!studentData) return responseHandler(res, 400, 'Data not found');
-    const randomNumber = Math.floor(Math.random() * (9999 - 1000)) + 1000;
+    const randomNumber = Math.floor(Math.random() * (999999 - 100000)) + 100000;
     await Student.update(
       {
         password: await bcrypt.hash(`${studentData.fullName.split(' ')[0].toUpperCase()}${randomNumber}`, 8)

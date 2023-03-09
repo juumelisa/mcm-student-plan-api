@@ -1,4 +1,5 @@
 const Sequelize = require("sequelize");
+const inputValidation = require("../helpers/inputValidation");
 const responseHandler = require("../helpers/responseHandler");
 const Student = require("../models/student");
 const StudentPlan = require("../models/studentPlan");
@@ -74,7 +75,7 @@ exports.getSubjectParticipantBySubject = async(req, res) => {
   try{
     if(!req.user.isAdmin) return responseHandler(res, 403, 'Unauthorized');
     const { subjectCode } = req.params;
-    console.log(('subjectCode').toUpperCase(), subjectCode)
+    if(!subjectCode) return responseHandler(res, 400, 'Required: subjectCode');
     const result = await StudentPlan.findAll({
       where: {
         subjectCode
@@ -99,10 +100,16 @@ exports.getSubjectParticipantBySubject = async(req, res) => {
 
 exports.addStudentPlan = async(req, res) => {
   try{
-    console.log(req.user)
     if(!req.user.studentId) return responseHandler(res, 403, 'Unauthorized');
+    const isValidInput = await inputValidation(['subjectCode'], [], req.body);
+    if(isValidInput.isError){
+      return responseHandler(res, 400, isValidInput.message);
+    }
     const { studentId } = req.user;
     const { subjectCode } = req.body;
+    const subjectDetail = await Subject.findByPk(subjectCode);
+    if(!subjectDetail) return responseHandler(res, 400, 'Subject not found');
+    if(subjectDetail.dataValues.subjectLevel === 'DEPARTMENT' && subjectDetail.dataValues.department !== req.user.major) return responseHandler(res, 403,  `This course only available for ${subjectDetail.department} students`);
     const subjectParticipant = await StudentPlan.findAndCountAll({
       where: {
         subjectCode
@@ -123,10 +130,8 @@ exports.addStudentPlan = async(req, res) => {
         grade: "F"
       }
     })
-    console.log(participant);
-    console.log(created)
     if(!created) return responseHandler(res, 400, 'Already participate');
-    return responseHandler(res, 200, 'Success');
+    return responseHandler(res, 200, 'Success', participant);
   }catch(err){
     return responseHandler(res, 500, 'Internal Server Error');
   }
@@ -136,10 +141,7 @@ exports.deleteSubjectParticipation = async(req, res) => {
   try{
     if(!req.user.studentId) return responseHandler(res, 403, 'Unauthorized');
     const { id } = req.params;
-    console.log(req.user)
-    console.log(id)
     const getParticipantDetail = await StudentPlan.findByPk(id);
-    console.log(getParticipantDetail)
     if(!getParticipantDetail) return responseHandler(res, 404, 'Data not found');
     if(getParticipantDetail.studentId !== req.user.studentId) return responseHandler(res, 403, 'Unauthorized');
     await StudentPlan.destroy({
@@ -149,7 +151,6 @@ exports.deleteSubjectParticipation = async(req, res) => {
     });
     return responseHandler(res, 200, 'Success');
   }catch(err){
-    console.log(err);
     return responseHandler(res, 500, 'Internal Server Error');
   }
 };
@@ -157,7 +158,12 @@ exports.deleteSubjectParticipation = async(req, res) => {
 exports.updateStudentGrade = async(req, res) => {
   try{
     if(!req.user.isAdmin) return responseHandler(res, 403, 'Unauthorized');
+    const isValidInput = await inputValidation(['id', 'grade'], [], req.body);
+    if(isValidInput.isError){
+      return responseHandler(res, 400, isValidInput.message);
+    }
     const { id, grade } = req.body;
+    if(!['A', 'B', 'C', 'D', 'E', 'F'].includes(grade)) return responseHandler(res, 404, 'Invalid Grade. Allow values: A, B, C, D, E or F');
     const subjectParticipantDetail = await StudentPlan.findByPk(id);
     if(!subjectParticipantDetail) return responseHandler(res, 404, 'Data not found');
     await StudentPlan.update({
@@ -166,7 +172,7 @@ exports.updateStudentGrade = async(req, res) => {
     {
       where: { id }
     })
-    return responseHandler(res, 200, 'Success');
+    return responseHandler(res, 200, 'Success', {id, grade});
   }catch(err){
     return responseHandler(res, 500, 'Internal Server Error');
   }
