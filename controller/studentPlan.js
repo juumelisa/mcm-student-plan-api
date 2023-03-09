@@ -1,3 +1,4 @@
+const Sequelize = require("sequelize");
 const responseHandler = require("../helpers/responseHandler");
 const Student = require("../models/student");
 const StudentPlan = require("../models/studentPlan");
@@ -5,8 +6,50 @@ const Subject = require("../models/subject");
 
 exports.getAllStudentPlan = async(req, res) => {
   try{
+    const { groupBy } = req.body;
     if(!req.user.isAdmin) return responseHandler(res, 403, 'Unauthorized');
+    const filter = {
+    }
+    if(groupBy && groupBy === 'studentId'){
+      filter.attributes = [
+        'studentId',
+        [Sequelize.fn('COUNT', Sequelize.col('subjectCode')), 'subjectParticipation'],
+      ]
+      filter.include = [
+        {
+          model: Student,
+          attributes: ['fullName']
+        }
+      ]
+      filter.group = ['studentId'];
+    }else if(groupBy && groupBy === 'subjectCode'){
+      filter.attributes = [
+        'subjectCode',
+        [Sequelize.fn('COUNT', Sequelize.col('studentId')), 'participants'],
+      ]
+      filter.include = [
+        {
+          model: Subject,
+          attributes: ['name']
+        }
+      ]
+      filter.group = ['subjectCode'];
+    }
+    const result = await StudentPlan.findAll(filter)
+    return responseHandler(res, 200, 'Success', result);
+  }catch(err){
+    console.log(err);
+    return responseHandler(res, 500, 'Internal Server Error');
+  }
+}
+
+exports.getSubjectParticipantByUser = async(req, res) => {
+  try{
+    const { studentId } = req.params;
     const result = await StudentPlan.findAll({
+      where: {
+        studentId
+      },
       include: [
         {
           model: Student,
@@ -16,12 +59,36 @@ exports.getAllStudentPlan = async(req, res) => {
           model: Subject,
           attributes: ['name']
         }
-    ]
-    })
-    console.log(result);
+      ]
+    });
     return responseHandler(res, 200, 'Success', result);
   }catch(err){
-    console.log(err);
+    return responseHandler(res, 500, 'Internal Server Error');
+  }
+}
+
+exports.getSubjectParticipantBySubject = async(req, res) => {
+  try{
+    const { subjectCode } = req.params;
+    console.log(('subjectCode').toUpperCase(), subjectCode)
+    const result = await StudentPlan.findAll({
+      where: {
+        subjectCode
+      },
+      include: [
+        {
+          model: Student,
+          attributes: ['fullName']
+        },
+        {
+          model: Subject,
+          attributes: ['name']
+        }
+      ]
+    });
+    console.log('RESULT: ', result);
+    return responseHandler(res, 200, 'Success', result);
+  }catch(err){
     return responseHandler(res, 500, 'Internal Server Error');
   }
 }
