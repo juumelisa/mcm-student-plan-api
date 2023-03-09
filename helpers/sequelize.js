@@ -2,7 +2,6 @@ const {Sequelize} = require('sequelize');
 require('dotenv').config();
 
 const { DB_HOST, DB_NAME, DB_USER, DB_PASSWORD } = process.env;
-console.log('db_HOST: ', process.env.DB_PASSWORD);
 const mysql = require("mysql2");
 
 // Open the connection to MySQL server

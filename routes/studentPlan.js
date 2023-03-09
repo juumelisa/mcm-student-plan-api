@@ -1,12 +1,8 @@
 var express = require('express');
+const { getAllStudentPlan } = require('../controller/studentPlan');
 var router = express.Router();
 
 /* GET users listing. */
-router.get('/', function(req, res) {
-  res.json({
-    error: 0,
-    message: 'Hello World'
-  });
-});
+router.get('/', getAllStudentPlan);
 
 module.exports = router;

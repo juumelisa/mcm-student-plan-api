@@ -8,8 +8,12 @@ const sequelize = require('./helpers/sequelize');
 var indexRouter = require('./routes/index');
 var subjectRouter = require('./routes/subject');
 var studentRouter = require('./routes/student');
+var studentPlanRouter = require('./routes/studentPlan');
+var adminRouter = require('./routes/admin');
+
 const students = require('./seeders/student');
 const subjects = require('./seeders/subject');
+const studentPlan = require('./seeders/studentPlan');
 
 var app = express();
 require('dotenv').config();
@@ -26,6 +30,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/student', studentRouter);
 app.use('/subject', subjectRouter);
+app.use('/studentPlan', studentPlanRouter);
+app.use('/admin', adminRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -47,6 +53,7 @@ app.listen(8000, async () => {
   await sequelize.sync();
   await students();
   await subjects();
+  await studentPlan();
 });
 
 module.exports = app;

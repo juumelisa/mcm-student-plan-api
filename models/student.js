@@ -6,6 +6,7 @@ const Student = sequelize.define('student', {
     type: Sequelize.INTEGER,
     unique: true,
     allowNull: false,
+    primaryKey: true,
     validate: {
       notNull: {
         msg: 'Student ID cannot be null!',
@@ -15,7 +16,7 @@ const Student = sequelize.define('student', {
       },
     }
   },
-  fullName: {
+  full_name: {
     type: Sequelize.STRING,
     unique: false,
     allowNull: false,
@@ -40,6 +41,15 @@ const Student = sequelize.define('student', {
         msg: 'Major cannot be empty!',
       },
     }
+  },
+  email: {
+    type: Sequelize.STRING,
+    unique: true,
+    allowNull: false
+  },
+  password: {
+    type: Sequelize.STRING,
+    allowNull: false
   }
 })
 

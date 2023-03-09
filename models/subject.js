@@ -6,6 +6,7 @@ const Subject = sequelize.define('subject', {
     type: Sequelize.STRING,
     unique: true,
     allowNull: false,
+    primaryKey: true,
     validate: {
       notNull: {
         msg: 'Student ID cannot be null!',
