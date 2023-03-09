@@ -118,8 +118,10 @@ exports.addStudentPlan = async(req, res) => {
         grade: "F"
       }
     })
-    if(created) return responseHandler(res, 400, 'Already participate');
-    return responseHandler(res, 200, 'Success', participant);
+    console.log(participant);
+    console.log(created)
+    if(!created) return responseHandler(res, 400, 'Already participate');
+    return responseHandler(res, 200, 'Success');
   }catch(err){
     return responseHandler(res, 500, 'Internal Server Error');
   }
@@ -143,6 +145,24 @@ exports.deleteSubjectParticipation = async(req, res) => {
     return responseHandler(res, 200, 'Success');
   }catch(err){
     console.log(err);
+    return responseHandler(res, 500, 'Internal Server Error');
+  }
+};
+
+exports.updateStudentGrade = async(req, res) => {
+  try{
+    if(!req.user.isAdmin) return responseHandler(res, 403, 'Unauthorized');
+    const { id, grade } = req.body;
+    const subjectParticipantDetail = await StudentPlan.findByPk(id);
+    if(!subjectParticipantDetail) return responseHandler(res, 404, 'Data not found');
+    await StudentPlan.update({
+      grade
+    },
+    {
+      where: { id }
+    })
+    return responseHandler(res, 200, 'Success');
+  }catch(err){
     return responseHandler(res, 500, 'Internal Server Error');
   }
 }
