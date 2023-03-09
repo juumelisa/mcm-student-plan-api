@@ -1,4 +1,4 @@
-const inputValidation = async(requiredFields, inputFields) => {
+const inputValidation = async(requiredFields, optionalFields, inputFields) => {
   try{
     const result = {
       isError: false,
@@ -8,13 +8,18 @@ const inputValidation = async(requiredFields, inputFields) => {
       result.isError = true;
       result.message = 'requiredFields should be an array'
     }
+    if(!Array.isArray(optionalFields)){
+      result.isError = true;
+      result.message = 'optionalFields should be an array'
+    }
     if(typeof inputFields == 'object' && !Array.isArray(inputFields)){
       for(let x in inputFields){
         if(!requiredFields.includes(x)){
-          // console.log('no need property')
-          result.isError = true;
-          result.message = `Unrequired property: ${x}`
-          return result;
+          if(!optionalFields.includes(x)){
+            result.isError = true;
+            result.message = `Unrequired property: ${x}`
+            return result;
+          }
         }
       }
       for(let x = 0; x < requiredFields.length; x++){

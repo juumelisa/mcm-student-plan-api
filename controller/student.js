@@ -7,11 +7,15 @@ const mail = require("../helpers/mail");
 
 exports.getAllStudent = async(req, res) => {
   try{
+    const limit = parseInt(req.body.limit) || 5;
+    const page = parseInt(req.body.page) || 1
     if(req.user.isAdmin){
-      const result = await Student.findAll({
-        attributes: ['studentId', 'fullName', 'major', 'email', 'status']
+      const result = await Student.findAndCountAll({
+        attributes: ['studentId', 'fullName', 'major', 'email', 'status'],
+        limit: limit,
+        offset: ((page - 1) * limit)
       })
-      return responseHandler(res, 200, 'Success',result);
+      return responseHandler(res, 200, 'Success', result.rows, {count: result.count, page}) ;
     }else{
       return responseHandler(res, 403, 'Unauthorized');
 
@@ -25,7 +29,7 @@ exports.getAllStudent = async(req, res) => {
 exports.getStudentDetail = async(req, res) => {
   try{
     const { id } = req.params;
-    console.log(id);
+    if(!id) return responseHandler(res, 400, 'Required: id');
     console.log(req.user.studentId)
     if(req.user.studentId !== parseInt(id) && !req.user.isAdmin) return responseHandler(res, 403, 'Unauthorized');
     const result = await Student.findByPk(id);
@@ -41,7 +45,7 @@ exports.addStudent = async(req, res) => {
   try{
     if(!req.user.isAdmin) return responseHandler(res, 403, 'Unauthorized');
     const requiredFields = ['fullName', 'email', 'major'];
-    const isValidInput = await inputValidation(requiredFields, req.body);
+    const isValidInput = await inputValidation(requiredFields, [], req.body);
     if(isValidInput.isError){
       return responseHandler(res, 400, isValidInput.message);
     }
@@ -63,7 +67,7 @@ exports.addStudent = async(req, res) => {
       html:  `
       <p>Hi, ${fullName},</p>
       <p>Here's the password to access your student account:</p>
-      <p><b>${fullName.split(' ')[0].toUpperCase()}${randomNumber}</b></p>
+      <h3><b>${fullName.split(' ')[0].toUpperCase()}${randomNumber}</b></h3>
       <p>Please don't share this information to others. We recommend you to change the password as soon as possible.</p>
       `
     })
@@ -85,7 +89,11 @@ exports.updateStudentData = async(req, res) => {
   try{
     if(!req.user.isAdmin) return responseHandler(res, 403, 'Unauthorized');
     const body = req.body;
-    if(body.fullName && !validator.isAlpha(body.fullName, ['en-US'], {ignore: " ."})) return responseHandler(res, 400, 'Name should be alphanumeric');
+    const isValidInput = await inputValidation(['studentId'], ['fullName', 'email', 'status', 'major'], body);
+    if(isValidInput.isError){
+      return responseHandler(res, 400, isValidInput.message);
+    }
+    if(body.fullName && !validator.isAlpha(body.fullName, ['en-US'], {ignore: " ."})) return responseHandler(res, 400, 'Name should only containe alphanumeric characters or dot(.)');
     const studentData = await Student.findByPk(parseInt(body.studentId));
     if(!studentData) return responseHandler(res, 404, 'Data not found');
     const updateData = {};
@@ -94,6 +102,7 @@ exports.updateStudentData = async(req, res) => {
         updateData[x] = body[x]
       }
     }
+    if(Object.keys(updateData).length === 0) return responseHandler(res, 400, 'No data change');
     await Student.update(updateData, {
       where: {
         studentId: body.studentId,
