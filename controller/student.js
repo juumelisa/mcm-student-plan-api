@@ -1,6 +1,7 @@
 const responseHandler = require("../helpers/responseHandler");
 const Student = require("../models/student");
 const bcrypt = require('bcryptjs');
+const validator = require('validator');
 
 exports.getAllStudent = async(req, res) => {
   try{
@@ -38,19 +39,24 @@ exports.addStudent = async(req, res) => {
   try{
     if(!req.user.isAdmin) return responseHandler(res, 403, 'Unauthorized');
     const { fullName, email, major, studentId} = req.body;
+    if(!validator.isAlpha(fullName, ['en-US'], {ignore: " ."})) return responseHandler(res, 400, 'Name should be alphanumeric');
     const student = await Student.create({
       fullName,
       email,
       major,
       password: await bcrypt.hash(`${fullName.split(' ')[0]}${studentId}`, 8)
     })
-    // if(!created) return responseHandler(res, 200, `Student with id ${studentId} exist`);
-    // else{
       return responseHandler(res, 200, 'Success', {student})
-    // }
   }catch(err){
-    console.log(err);
-    return responseHandler(res, 500, err);
+    if(String(err.name).startsWith("SequelizeUniqueConstraintError")){
+      if(String(err.errors[0].message).startsWith('email')){
+        responseHandler(res, 400, 'Email already used');
+      }else{
+        return responseHandler(res, 400, err.errors[0].message);
+      }
+    }else{
+      return responseHandler(res, 500, 'Internal server error');
+    }
   }
 }
 
@@ -58,6 +64,7 @@ exports.updateStudentData = async(req, res) => {
   try{
     if(!req.user.isAdmin) return responseHandler(res, 403, 'Unauthorized');
     const body = req.body;
+    if(body.fullName && !validator.isAlpha(body.fullName, ['en-US'], {ignore: " ."})) return responseHandler(res, 400, 'Name should be alphanumeric');
     const studentData = await Student.findByPk(parseInt(body.studentId));
     if(!studentData) return responseHandler(res, 404, 'Data not found');
     const updateData = {};

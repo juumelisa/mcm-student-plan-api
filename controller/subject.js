@@ -1,5 +1,6 @@
 const responseHandler = require("../helpers/responseHandler");
 const Subject = require("../models/subject");
+const validator = require('validator');
 
 exports.getAllSubject = async(req, res) => {
   try{
@@ -25,6 +26,7 @@ exports.addSubject = async(req, res) => {
   try{
     if(!req.user.isAdmin) return responseHandler(res, 403, 'Unauthorized');
     const { code, name, subjectLevel, department, faculty } = req.body;
+    if(validator.isAlpha(name, ['en-US'], ' .-')) return responseHandler(res, 400, 'Subject name should only contain alphabet, dash(-) or dot(.)')
     const result = await Subject.create({
       code, name, subjectLevel, department, faculty
     })

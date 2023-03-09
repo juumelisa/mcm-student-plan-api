@@ -46,7 +46,15 @@ const Student = sequelize.define('student', {
   email: {
     type: Sequelize.STRING,
     unique: true,
-    allowNull: false
+    allowNull: false,
+    validate: {
+      notNull: {
+        msg: 'Email cannot be null!',
+      },
+      notEmpty: {
+        msg: 'Email cannot be empty!',
+      },
+    }
   },
   password: {
     type: Sequelize.STRING,
