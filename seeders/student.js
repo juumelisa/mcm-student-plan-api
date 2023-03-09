@@ -1,13 +1,14 @@
-const Student = require("../models/product")
+const Student = require("../models/student")
 
 const students = async() => {
-  const studentList = await Student.findAll();
-
+  const student = await Student.findAll();
+  console.log('studentList', student);
   const seedStudent = {
     student_id: 12192008,
-    fullName: 'Emma Watson'
+    fullName: 'Emma Watson',
+    major: 'Matematika'
   }
-  if(studentList.length < 1){
+  if(student.length < 1){
     await Student.create(seedStudent);
   }
 };

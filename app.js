@@ -3,13 +3,15 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+const sequelize = require('./helpers/sequelize');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
-var studentRouter = require('./routes/users');
+var studentRouter = require('./routes/student');
+const students = require('./seeders/student');
 
 var app = express();
-
+require('dotenv').config();
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
@@ -38,6 +40,11 @@ app.use(function(err, req, res) {
   // render the error page
   res.status(err.status || 500);
   res.render('error');
+});
+
+app.listen(8000, async () => {
+  await sequelize.sync();
+  await students();
 });
 
 module.exports = app;
