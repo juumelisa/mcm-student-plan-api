@@ -38,15 +38,6 @@ exports.addStudent = async(req, res) => {
   try{
     if(!req.user.isAdmin) return responseHandler(res, 403, 'Unauthorized');
     const { fullName, email, major, studentId} = req.body;
-    // const [student, created] = await Student.findOrCreate({
-    //   where: { studentId },
-    //   defaults: {
-    //     fullName,
-    //     email,
-    //     major,
-    //     password: await bcrypt.hash(`${fullName.split(' ')[0]}${studentId}`, 8)
-    //   }
-    // })
     const student = await Student.create({
       fullName,
       email,
