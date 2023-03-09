@@ -8,7 +8,13 @@ const Subject = require("../models/subject");
 exports.getAllStudentPlan = async(req, res) => {
   try{
     if(!req.user.isAdmin) return responseHandler(res, 403, 'Unauthorized');
+    const isValidInput = await inputValidation([], ['groupBy'], req.body);
+    if(isValidInput.isError){
+      return responseHandler(res, 400, isValidInput.message);
+    }
     const { groupBy } = req.body;
+    const groupByEnum = ['studentId', 'subjectCode'];
+    if(!groupByEnum.includes(groupBy)) return responseHandler(res, 400, `Available group by choices: ${groupByEnum.join(' and ')}`)
     const filter = {
     }
     if(groupBy && groupBy === 'studentId'){

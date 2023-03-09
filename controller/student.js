@@ -51,10 +51,11 @@ exports.getAllStudent = async(req, res) => {
 
 exports.getStudentDetail = async(req, res) => {
   try{
-    const { id } = req.params;
-    if(!id) return responseHandler(res, 400, 'Required: id');
-    if(id.length < 2) return responseHandler(res, 400, 'Invalid id length');
-    if(req.user.studentId !== parseInt(id) && !req.user.isAdmin) return responseHandler(res, 403, 'Unauthorized');
+    let { id } = req.params;
+    if(!req.user.studentId && !req.user.isAdmin) return responseHandler(res, 403, 'Unauthorized');
+    if(req.user.studentId){
+      id = req.user.studentId;
+    }
     const result = await Student.findByPk(id, {
       attributes: ['studentId', 'fullName', 'email', 'major', 'status', 'createdAt', 'updatedAt']
     });
@@ -122,6 +123,12 @@ exports.updateStudentData = async(req, res) => {
     if(body.email && !validator.isEmail(body.email)) return responseHandler(res, 400, 'Wrong email format');
     const studentData = await Student.findByPk(parseInt(body.studentId));
     if(!studentData) return responseHandler(res, 404, 'Data not found');
+    if(body.fullName){
+      body.fullName = body.fullName.toUpperCase()
+    }
+    if(body.email){
+      body.email = body.email.toLowerCase()
+    }
     const updateData = {};
     for(let x in body){
       if(x !== 'studentId'){

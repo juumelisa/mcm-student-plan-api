@@ -9,7 +9,7 @@ A simple API for PT Merah Cipta Media Skill Test recruitment. Create with Nodejs
 Install my-project with npm
 
 ```bash
-  git clone https://github.com/juumelisa/mcm-student-plan-api.git
+  git clone http://github.com/juumelisa/mcm-student-plan-api.git
 ```
 ```bash
   cd mcm-student-plan-api
@@ -89,13 +89,13 @@ API ready at http://localhost:3000
 
 ## Documentation
 
-<!-- [Documentation](https://linktodocumentation) -->
+<!-- [Documentation](http://linktodocumentation) -->
 
 ## Admin Section
 ### Login
 **Method**: POST
 ```bash
-https://localhost:3000/admin/login
+http://localhost:3000/admin/login
 ```
 **Request Body** raw (json)
 ```bash
@@ -125,10 +125,11 @@ https://localhost:3000/admin/login
 }
 ```
 
-#### Add Student
+### Add Student
+This endpoint can be access by admin.
 **Method**: POST
 ```bash
-https://localhost:3000/student/add
+http://localhost:3000/student/add
 ```
 **Request Headers**
 ```bash
@@ -174,11 +175,11 @@ Authorization: sessionToken
 }
 ```
 
-#### Get Student List
+### Get Student List
 Only admin can access this endpoint.
 **Method**: GET
 ```bash
-https://localhost:3000/student/
+http://localhost:3000/student/
 ```
 **Request Headers**
 ```bash
@@ -229,7 +230,7 @@ Authorization: sessionToken
 Only admin and student with define id can access this endpoint.
 **Method**: GET
 ```bash
-https://localhost:3000/student/${id}
+http://localhost:3000/student/${id}
 ```
 **Request Headers**
 ```bash
@@ -264,11 +265,11 @@ Authorization: sessionToken
 
 
 
-#### Update Student Data
+### Update Student Data
 Only admin can access this endpoint.
 **Method**: PATCH
 ```bash
-https://localhost:3000/student/
+http://localhost:3000/student/
 ```
 **Request Headers**
 ```bash
@@ -308,7 +309,7 @@ Authorization: sessionToken
 Only admin can access this endpoint.
 **Method**: DELETE
 ```bash
-https://localhost:3000/student/${id}
+http://localhost:3000/student/${id}
 ```
 **Request Headers**
 ```bash
@@ -404,23 +405,6 @@ Authorization: sessionToken
 {
     "success": true,
     "message": "Success",
-    "result": {
-        "code": "MATH005",
-        "name": "STATISTIC",
-        "subjectLevel": "DEPARTMENT",
-        "department": "MATHEMATIC",
-        "faculty": "",
-        "updatedAt": "2023-03-09T19:39:04.293Z",
-        "createdAt": "2023-03-09T19:39:04.293Z"
-    }
-}
-```
-
-**Example Error Response**
-```bash
-{
-    "success": true,
-    "message": "Success",
     "pageinfo": {
         "count": 11,
         "page": 2
@@ -477,17 +461,8 @@ Authorization: sessionToken
 **Example Error Response**
 ```bash
 {
-    "success": true,
-    "message": "Success",
-    "result": {
-        "code": "MATH005",
-        "name": "STATISTIC",
-        "subjectLevel": "DEPARTMENT",
-        "department": "MATHEMATIC",
-        "faculty": "",
-        "createdAt": "2023-03-09T19:39:04.000Z",
-        "updatedAt": "2023-03-09T19:39:04.000Z"
-    }
+    "success": false,
+    "message": "Data not found"
 }
 ```
 
@@ -497,7 +472,7 @@ Only admin can access this endpoint.
 
 **Method**: PATCH
 ```bash
-https://localhost:3000/subject/
+http://localhost:3000/subject/
 ```
 **Request Headers**
 ```bash
@@ -540,7 +515,7 @@ Only admin can access this endpoint.
 
 **Method**: DELETE
 ```bash
-https://localhost:3000/subject/${code}
+http://localhost:3000/subject/${code}
 ```
 **Request Headers**
 ```bash
@@ -564,12 +539,190 @@ Authorization: sessionToken
 }
 ```
 
+
+### Get Subject Participants
+Only admin can acess this endpoint
+**Method**: GET
+```bash
+http://localhost:3000/studentPlan/
+```
+**Request Headers**
+```bash
+Authorization: sessionToken
+```
+
+**Request Body (optional)** raw(json)
+```bash
+{
+    "groupBy": "subjectCode"
+}
+```
+**Note:** optional groupBy: "studentId" or "subjectCode"
+
+**Success Response**
+
+```bash
+{
+    "success": true,
+    "message": "Success",
+    "result": [
+        {
+            "id": 3,
+            "studentId": 12192008,
+            "subjectCode": "MT002",
+            "grade": "A",
+            "createdAt": "2023-03-09T10:04:19.000Z",
+            "updatedAt": "2023-03-09T10:09:11.000Z"
+        },
+        {
+            ...
+        },
+        {
+            ...
+        },
+        {
+            ...
+        }
+    ]
+}
+```
+
+**Error Response**
+```bash
+{
+    "success": false,
+    "message": "Available group by choices: studentId and subjectCode"
+}
+```
+
+### GET SUBJECT PARTICIPANT BY USER
+Only admin and define user can acess this endpoint
+**Method**: GET
+```bash
+http://localhost:3000/studentPlan/student/:studentId
+```
+**Request Headers**
+```bash
+Authorization: sessionToken
+```
+
+**Success Response**
+
+```bash
+{
+    "success": true,
+    "message": "Success",
+    "result": [
+        {
+            "id": 10,
+            "studentId": 12192035,
+            "subjectCode": "SAS0036",
+            "grade": "F",
+            "createdAt": "2023-03-09T17:02:59.000Z",
+            "updatedAt": "2023-03-09T17:02:59.000Z",
+            "student": {
+                "fullName": "MEISSA JOO"
+            },
+            "subject": {
+                "name": "ENGLISH-D"
+            }
+        }
+    ]
+}
+```
+
+**Error Response**
+```bash
+{
+    "success": false,
+    "message": "Unauthorized"
+}
+```
+
+### GET SUBJECT PARTICIPANT BY SUBJECT
+Only admin can acess this endpoint
+**Method**: GET
+```bash
+http://localhost:3000/studentPlan/subject/:subjectCode
+```
+**Request Headers**
+```bash
+Authorization: sessionToken
+```
+
+**Request Body (required)** raw(json)
+```bash
+{
+    "id": 4,
+    "grade": "A"
+}
+```
+**Success Response**
+
+```bash
+{
+    "success": true,
+    "message": "Success"
+}
+```
+**Error Response**
+```bash
+{
+    "success": false,
+    "message": "Invalid Grade. Allow values: A, B, C, D, E or F"
+}
+```
+
+
+### UPDATE STUDENT GRADE IN PARTICIPANT SUBJECT
+Only admin can acess this endpoint
+**Method**: GET
+```bash
+http://localhost:3000/studentPlan/grade
+```
+**Request Headers**
+```bash
+Authorization: sessionToken
+```
+
+**Success Response**
+
+```bash
+{
+    "success": true,
+    "message": "Success",
+    "result": [
+        {
+            "id": 4,
+            "studentId": 12192008,
+            "subjectCode": "MT001",
+            "grade": "A",
+            "createdAt": "2023-03-09T10:05:29.000Z",
+            "updatedAt": "2023-03-09T17:06:47.000Z",
+            "student": {
+                "fullName": "EMMA WATSON"
+            },
+            "subject": {
+                "name": "Kalkulus I"
+            }
+        }
+    ]
+}
+```
+**Error Response**
+```bash
+{
+    "success": false,
+    "message": "Unauthorized"
+}
+```
+
 ## Student Section
 
 ### Login
 **Method**: POST
 ```bash
-https://localhost:3000/student/login
+http://localhost:3000/student/login
 ```
 **Request Body** raw (json)
 ```bash
@@ -601,7 +754,7 @@ https://localhost:3000/student/login
 ### Change Password
 **Method**: POST
 ```bash
-https://localhost:3000/student/changePassword
+http://localhost:3000/student/changePassword
 ```
 **Request Body** raw (json)
 ```bash
@@ -628,12 +781,10 @@ https://localhost:3000/student/changePassword
 }
 ```
 
-
-
 ### Reset Password
 **Method**: POST
 ```bash
-https://localhost:3000/student/resetPassword
+http://localhost:3000/student/resetPassword
 ```
 **Request Body** raw (json)
 ```bash
@@ -654,5 +805,120 @@ https://localhost:3000/student/resetPassword
 {
     "success": false,
     "message": "Data not found"
+}
+```
+
+### Reset Password
+**Method**: POST
+```bash
+http://localhost:3000/student/resetPassword
+```
+**Request Body** raw (json)
+```bash
+{
+    "studentId": "12192035"
+}
+```
+
+**Note:** New password will be send to student's email.
+
+**Success Response**
+```bash
+{
+    "success": true,
+    "message": "We has send your new password to your email mel***@***.io"
+}
+```
+
+**Error Response**
+```bash
+{
+    "success": false,
+    "message": "Data not found"
+}
+```
+
+
+### Add Subject Participan
+
+This endpoint can be access by students to subscribe to a subject class.
+
+**Method**: POST
+```bash
+http://localhost:3000/studentPlan/
+```
+
+**Request Headers**
+```bash
+Authorization: sessionToken
+```
+
+**Request Body** raw (json)
+```bash
+{
+    "subjectCode": "MT001"
+}
+```
+
+**Success Response**
+```bash
+{
+    "success": true,
+    "message": "Success",
+    "result": {
+        "id": 11,
+        "studentId": 12192035,
+        "subjectCode": "MT001",
+        "grade": "F",
+        "updatedAt": "2023-03-09T20:47:05.271Z",
+        "createdAt": "2023-03-09T20:47:05.271Z"
+    }
+}
+```
+
+**Error Response**
+```bash
+{
+    "success": false,
+    "message": "Already participate"
+}
+```
+
+
+### Delete Subject Participan
+
+This endpoint can be access by students to unsubscribe a subject class.
+
+**Method**: DELETE
+```bash
+http://localhost:3000/studentPlan/:id
+```
+
+**Request Headers**
+```bash
+Authorization: sessionToken
+```
+
+**Success Response**
+```bash
+{
+    "success": true,
+    "message": "Success",
+    "result": {
+        "id": 11,
+        "studentId": 12192035,
+        "subjectCode": "MT001",
+        "grade": "F",
+        "updatedAt": "2023-03-09T20:47:05.271Z",
+        "createdAt": "2023-03-09T20:47:05.271Z"
+    }
+}
+```
+
+**Error Response**
+```bash
+{
+    "success": false,
+    "message": "Unauthorized"
 }
 ```
