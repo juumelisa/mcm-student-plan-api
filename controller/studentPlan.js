@@ -6,8 +6,8 @@ const Subject = require("../models/subject");
 
 exports.getAllStudentPlan = async(req, res) => {
   try{
-    const { groupBy } = req.body;
     if(!req.user.isAdmin) return responseHandler(res, 403, 'Unauthorized');
+    const { groupBy } = req.body;
     const filter = {
     }
     if(groupBy && groupBy === 'studentId'){
@@ -46,6 +46,9 @@ exports.getAllStudentPlan = async(req, res) => {
 exports.getSubjectParticipantByUser = async(req, res) => {
   try{
     const { studentId } = req.params;
+    console.log(req.user);
+    console.log(studentId)
+    if(!req.user.isAdmin  && req.user.studentId !== parseInt(studentId)) return responseHandler(res, 403, 'Unauthorized');
     const result = await StudentPlan.findAll({
       where: {
         studentId
@@ -69,6 +72,7 @@ exports.getSubjectParticipantByUser = async(req, res) => {
 
 exports.getSubjectParticipantBySubject = async(req, res) => {
   try{
+    if(!req.user.isAdmin) return responseHandler(res, 403, 'Unauthorized');
     const { subjectCode } = req.params;
     console.log(('subjectCode').toUpperCase(), subjectCode)
     const result = await StudentPlan.findAll({
@@ -114,12 +118,29 @@ exports.addStudentPlan = async(req, res) => {
         grade: "F"
       }
     })
-    // await StudentPlan.create({
-    //   subjectCode,
-    //   studentId
-    // });
     if(created) return responseHandler(res, 400, 'Already participate');
     return responseHandler(res, 200, 'Success', participant);
+  }catch(err){
+    return responseHandler(res, 500, 'Internal Server Error');
+  }
+};
+
+exports.deleteSubjectParticipation = async(req, res) => {
+  try{
+    if(!req.user.studentId) return responseHandler(res, 403, 'Unauthorized');
+    const { id } = req.params;
+    console.log(req.user)
+    console.log(id)
+    const getParticipantDetail = await StudentPlan.findByPk(id);
+    console.log(getParticipantDetail)
+    if(!getParticipantDetail) return responseHandler(res, 404, 'Data not found');
+    if(getParticipantDetail.studentId !== req.user.studentId) return responseHandler(res, 403, 'Unauthorized');
+    await StudentPlan.destroy({
+      where: {
+        id
+      }
+    });
+    return responseHandler(res, 200, 'Success');
   }catch(err){
     console.log(err);
     return responseHandler(res, 500, 'Internal Server Error');
