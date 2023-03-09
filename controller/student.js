@@ -38,15 +38,28 @@ exports.getStudentDetail = async(req, res) => {
 exports.addStudent = async(req, res) => {
   try{
     if(!req.user.isAdmin) return responseHandler(res, 403, 'Unauthorized');
-    const { fullName, email, major, studentId} = req.body;
+    const requiredFields = ['fullName', 'email', 'major'];
+    for(let x in req.body){
+      if(!requiredFields.includes(x)){
+        console.log('no need property')
+        return responseHandler(res, 400, `Unrequired property: ${x}`);
+      }
+    }
+    for(let x = 0; x < requiredFields.length; x++){
+      if(!Object.prototype.hasOwnProperty.call(req.body, requiredFields[x])){
+        return responseHandler(res, 400, `Required field: ${requiredFields[x]}`)
+      }
+    }
+    const { fullName, email, major} = req.body;
     if(!validator.isAlpha(fullName, ['en-US'], {ignore: " ."})) return responseHandler(res, 400, 'Name should be alphanumeric');
+    if(!validator.isEmail(email)) return responseHandler(res, 400, 'Wrong email format');
     const student = await Student.create({
-      fullName,
-      email,
-      major,
-      password: await bcrypt.hash(`${fullName.split(' ')[0]}${studentId}`, 8)
+      fullName: fullName.toUpperCase(),
+      email: email.toLowerCase(),
+      major: major.toUpperCase(),
+      password: await bcrypt.hash(`${fullName.split(' ')[0].toUpperCase()}1234`, 8)
     })
-      return responseHandler(res, 200, 'Success', {student})
+    return responseHandler(res, 200, 'Success', student)
   }catch(err){
     if(String(err.name).startsWith("SequelizeUniqueConstraintError")){
       if(String(err.errors[0].message).startsWith('email')){
