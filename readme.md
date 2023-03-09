@@ -137,7 +137,7 @@ Authorization: sessionToken
 ```
 **Note**: sessionToken from the previous login.
 
-**Request Body** raw (json)
+**Request Body (required)** raw (json)
 ```bash
 {
     "fullName": "Melisa",
@@ -226,8 +226,8 @@ Authorization: sessionToken
 ```
 
 
-#### Get Student Detail
-Only admin and student with define id can access this endpoint.
+### Get Student Detail
+Only admin and student with define id can access this endpoint. Student doesn't need to provide id through request params. Id will be generate through sessionToken.
 **Method**: GET
 ```bash
 http://localhost:3000/student/${id}
@@ -280,9 +280,13 @@ Authorization: sessionToken
 ```bash
 {
     "studentId": "12192008",
-    "fullName": "emma watson"
+    "fullName": "emma watson",
+    "status": "INACTIVE",
+    "email": "emma@email.com",
+    "major": "PHYSIC",
 }
 ```
+**Note:** status value should be 'ACTIVE' or 'INACTIVE'.
 
 **Success Response**
 
@@ -433,7 +437,7 @@ Authorization: sessionToken
 ### Get Subject Detail
 **Method**: GET
 ```bash
-http://localhost:3000/subject/%{code}
+http://localhost:3000/subject/${code}
 ```
 **Request Headers**
 ```bash
@@ -483,7 +487,10 @@ Authorization: sessionToken
 ```bash
 {
     "code": "MT002",
-    "subjectLevel": "UNIVERSITY"
+    "name": "STATISTIC",
+    "subjectLevel": "DEPARTMENT",
+    "department": "MATHEMATIC",
+    "faculty": "",
 }
 ```
 
@@ -494,9 +501,10 @@ Authorization: sessionToken
     "success": true,
     "message": "Success",
     "result": {
-        "subjectLevel": "UNIVERSITY",
-        "department": "",
-        "faculty": ""
+      "name": "STATISTIC",
+      "subjectLevel": "DEPARTMENT",
+      "department": "MATHEMATIC",
+      "faculty": ""
     }
 }
 ```
@@ -660,35 +668,7 @@ Authorization: sessionToken
 **Success Response**
 
 ```bash
-{
-    "success": true,
-    "message": "Success"
-}
-```
-**Error Response**
-```bash
-{
-    "success": false,
-    "message": "Invalid Grade. Allow values: A, B, C, D, E or F"
-}
-```
 
-
-### UPDATE STUDENT GRADE IN PARTICIPANT SUBJECT
-Only admin can acess this endpoint
-**Method**: GET
-```bash
-http://localhost:3000/studentPlan/grade
-```
-**Request Headers**
-```bash
-Authorization: sessionToken
-```
-
-**Success Response**
-
-```bash
-{
     "success": true,
     "message": "Success",
     "result": [
@@ -705,6 +685,20 @@ Authorization: sessionToken
             "subject": {
                 "name": "Kalkulus I"
             }
+        },
+        {
+            "id": 11,
+            "studentId": 12192035,
+            "subjectCode": "MT001",
+            "grade": "F",
+            "createdAt": "2023-03-09T20:47:05.000Z",
+            "updatedAt": "2023-03-09T20:47:05.000Z",
+            "student": {
+                "fullName": "MEISSA JOO"
+            },
+            "subject": {
+                "name": "Kalkulus I"
+            }
         }
     ]
 }
@@ -714,6 +708,41 @@ Authorization: sessionToken
 {
     "success": false,
     "message": "Unauthorized"
+}
+```
+
+
+### UPDATE STUDENT GRADE IN PARTICIPANT SUBJECT
+Only admin can acess this endpoint
+**Method**: GET
+```bash
+http://localhost:3000/studentPlan/grade
+```
+**Request Headers**
+```bash
+Authorization: sessionToken
+```
+
+**Request Body (required)** raw(json)
+```bash
+{
+    "id": 4,
+    "grade": "A"
+}
+```
+**Success Response**
+
+```bash
+{
+    "success": true,
+    "message": "Success"
+}
+```
+**Error Response**
+```bash
+{
+    "success": false,
+    "message": "Invalid Grade. Allow values: A, B, C, D, E or F"
 }
 ```
 
