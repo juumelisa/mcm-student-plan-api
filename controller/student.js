@@ -2,6 +2,7 @@ const responseHandler = require("../helpers/responseHandler");
 const Student = require("../models/student");
 const bcrypt = require('bcryptjs');
 const validator = require('validator');
+const inputValidation = require("../helpers/inputValidation");
 
 exports.getAllStudent = async(req, res) => {
   try{
@@ -39,16 +40,9 @@ exports.addStudent = async(req, res) => {
   try{
     if(!req.user.isAdmin) return responseHandler(res, 403, 'Unauthorized');
     const requiredFields = ['fullName', 'email', 'major'];
-    for(let x in req.body){
-      if(!requiredFields.includes(x)){
-        console.log('no need property')
-        return responseHandler(res, 400, `Unrequired property: ${x}`);
-      }
-    }
-    for(let x = 0; x < requiredFields.length; x++){
-      if(!Object.prototype.hasOwnProperty.call(req.body, requiredFields[x])){
-        return responseHandler(res, 400, `Required field: ${requiredFields[x]}`)
-      }
+    const isValidInput = await inputValidation(requiredFields, req.body);
+    if(isValidInput.isError){
+      return responseHandler(res, 400, isValidInput.message);
     }
     const { fullName, email, major} = req.body;
     if(!validator.isAlpha(fullName, ['en-US'], {ignore: " ."})) return responseHandler(res, 400, 'Name should be alphanumeric');
