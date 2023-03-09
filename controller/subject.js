@@ -15,6 +15,7 @@ exports.getSubjectDetail = async(req, res) => {
     const { code } = req.params;
     const result = await Subject.findByPk(code);
     if(!result) return responseHandler(res, 404, 'Data not found');
+    return responseHandler(res, 200, result);
   }catch(err){
     return responseHandler(res, 500, err);
   }
