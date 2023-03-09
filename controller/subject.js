@@ -26,13 +26,23 @@ exports.addSubject = async(req, res) => {
   try{
     if(!req.user.isAdmin) return responseHandler(res, 403, 'Unauthorized');
     const { code, name, subjectLevel, department, faculty } = req.body;
-    if(validator.isAlpha(name, ['en-US'], ' .-')) return responseHandler(res, 400, 'Subject name should only contain alphabet, dash(-) or dot(.)')
+    if(!validator.isAlpha(name, ['en-US'], {ignore: " .-"})) return responseHandler(res, 400, 'Subject name should only contain alphabet, dash(-) or dot(.)')
     const result = await Subject.create({
       code, name, subjectLevel, department, faculty
     })
     return responseHandler(res, 200, 'Success', result);
   }catch(err){
-    return responseHandler(res, 500, err);
+    if(err.name && String(err.name).startsWith("SequelizeUniqueConstraintError")){
+      if(String(err.errors[0].message).startsWith('PRIMARY')){
+        responseHandler(res, 400, `Subject with Code ${req.body.code} already exist.`);
+      }else if(String(err.errors[0].message).startsWith('name')){
+        responseHandler(res, 400, `Subject ${req.body.name} already exist.`);
+      }else{
+        return responseHandler(res, 400, err.errors[0].message);
+      }
+    }else{
+      return responseHandler(res, 500, 'Internal server error');
+    }
   }
 }
 

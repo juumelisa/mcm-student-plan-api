@@ -6,8 +6,10 @@ const validator = require('validator');
 
 exports.adminLogin = async(req, res) => {
   try{
-    const { accessKey } = req.body
-    if( accessKey !== process.env.ADMIN_ACCESS_KEY){
+    const { accessKey } = req.body;
+    if(!accessKey) return responseHandler(res, 400, 'Required accessKey');
+    if(accessKey.length < 10) return responseHandler(res, 400, 'Invalid accessKey length');
+    if(accessKey !== process.env.ADMIN_ACCESS_KEY){
       return responseHandler(res, 403, 'Unauthorized');
     }
     const authData = {
