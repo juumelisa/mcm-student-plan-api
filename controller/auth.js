@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const responseHandler = require("../helpers/responseHandler");
 const Student = require('../models/student');
+const validator = require('validator');
 
 exports.adminLogin = async(req, res) => {
   try{
@@ -23,6 +24,7 @@ exports.adminLogin = async(req, res) => {
 exports.studentLogin = async(req, res) => {
   try{
     const { email, password } = req.body;
+    if(!validator.isEmail(email)) return responseHandler(res, 400, 'Wrong email format');
     const studentData = await Student.findOne({where: {email}});
     if(!studentData) return responseHandler(res, 400, 'Wrong credentials');
     if(studentData.password === `${studentData.fullName.split(' ')[0]}${studentData.studentId}` && studentData.password === password){
@@ -46,6 +48,7 @@ exports.studentLogin = async(req, res) => {
 exports.studentChangePassword = async(req, res) => {
   try{
     const body = req.body;
+    if(!validator.isEmail(body.email)) return responseHandler(res, 400, 'Wrong email format');
     if(body.newPassword !== body.repeatNewPassword) return responseHandler(res, 400, 'Password not match');
     const studentData = await Student.findOne({where: {email: body.email}});
     if(!studentData) return responseHandler(res, 400, 'Wrong credentials');
