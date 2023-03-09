@@ -3,6 +3,7 @@ const Student = require("../models/student");
 const bcrypt = require('bcryptjs');
 const validator = require('validator');
 const inputValidation = require("../helpers/inputValidation");
+const mail = require("../helpers/mail");
 
 exports.getAllStudent = async(req, res) => {
   try{
@@ -47,11 +48,24 @@ exports.addStudent = async(req, res) => {
     const { fullName, email, major} = req.body;
     if(!validator.isAlpha(fullName, ['en-US'], {ignore: " ."})) return responseHandler(res, 400, 'Name should be alphanumeric');
     if(!validator.isEmail(email)) return responseHandler(res, 400, 'Wrong email format');
+    const randomNumber = Math.floor(Math.random() * (9999 - 1000)) + 1000;
     const student = await Student.create({
       fullName: fullName.toUpperCase(),
       email: email.toLowerCase(),
       major: major.toUpperCase(),
-      password: await bcrypt.hash(`${fullName.split(' ')[0].toUpperCase()}1234`, 8)
+      password: await bcrypt.hash(`${fullName.split(' ')[0].toUpperCase()}${randomNumber}`, 8)
+    });
+    await mail.sendMail({
+      from: process.env.APP_EMAIL,
+      to: email.toLowerCase(),
+      subject: 'Student Password',
+      text: String(randomNumber),
+      html:  `
+      <p>Hi, ${fullName},</p>
+      <p>Here's the password to access your student account:</p>
+      <p><b>${fullName.split(' ')[0].toUpperCase()}${randomNumber}</b></p>
+      <p>Please don't share this information to others. We recommend you to change the password as soon as possible.</p>
+      `
     })
     return responseHandler(res, 200, 'Success', student)
   }catch(err){
