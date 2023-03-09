@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
-const responseHandler = require("../helpers/responseHandler")
+const responseHandler = require("../helpers/responseHandler");
+// const Student = require('../models/student');
 
 exports.adminLogin = async(req, res) => {
   try{
@@ -14,7 +15,15 @@ exports.adminLogin = async(req, res) => {
     const token = jwt.sign(authData, process.env.APP_SECRET);
     return responseHandler(res, 200, token);
   }catch(err){
-    console.log(err)
     return responseHandler(res, 500, 'Internal Server Error');
   }
-}
+};
+
+// exports.studentLogin = async(req, res) => {
+//   try{
+//     const { email, password } = req.body;
+//     const studentData = await Student.findOne
+//   }catch(err){
+//     return responseHandler(res, 500, 'Internal Server Error');
+//   }
+// }
