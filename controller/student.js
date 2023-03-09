@@ -60,7 +60,7 @@ exports.getStudentDetail = async(req, res) => {
     });
     console.log(result);
     if(!result) return responseHandler(res, 404, 'Student not found');
-    return responseHandler(res, 200, result);
+    return responseHandler(res, 200, 'Success', result);
   }catch{
     return responseHandler(res, 500, 'Internal Server Error');
   }

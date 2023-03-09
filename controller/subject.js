@@ -16,11 +16,11 @@ exports.getAllSubject = async(req, res) => {
     if(page && !Number.isInteger(page)){
       return responseHandler(res, 400, 'Page should be an integer');
     }
-    const result = await Subject.findAll({
+    const result = await Subject.findAndCountAll({
       limit: limit || 10,
       page: (page - 1) * limit || 0,
     })
-    return responseHandler(res, 200, 'Success', result, {limit: limit || 10, page: page || 1});
+    return responseHandler(res, 200, 'Success', result.rows, {count: result.count, page: page || 1});
   }catch(err){
     return responseHandler(res, 500, 'Internal Server Error');
   }
@@ -92,16 +92,16 @@ exports.updateSubject = async(req, res) => {
     if(req.body.subjectLevel){
       const subjectLevelEnum = ['UNIVERSITY', 'FACULTY', 'DEPARTMENT'];
       if(!subjectLevelEnum.includes(req.body.subjectLevel.toUpperCase())) return responseHandler(res, 400, `subjectLevel valid value: ${subjectLevelEnum.join(', ')}`);
-    }if(req.bodysubjectLevel.toUpperCase() == 'UNIVERSITY'){
-      req.body.subjectLevel = req.bodysubjectLevel.toUpperCase();
+    }if(req.body.subjectLevel.toUpperCase() == 'UNIVERSITY'){
+      req.body.subjectLevel = req.body.subjectLevel.toUpperCase();
       req.body.department = "";
       req.body.faculty = "";
-    }else if(req.bodysubjectLevel.toUpperCase() == 'FACULTY'){
-      req.body.subjectLevel = req.bodysubjectLevel.toUpperCase();
+    }else if(req.body.subjectLevel.toUpperCase() == 'FACULTY'){
+      req.body.subjectLevel = req.body.subjectLevel.toUpperCase();
       req.body.department = "";
       if(req.body.length < 1) return responseHandler(res, 400, 'Wrong faculty');
-    }else if(req.bodysubjectLevel.toUpperCase() == 'DEPARTMENT'){
-      req.body.subjectLevel = req.bodysubjectLevel.toUpperCase();
+    }else if(req.body.subjectLevel.toUpperCase() == 'DEPARTMENT'){
+      req.body.subjectLevel = req.body.subjectLevel.toUpperCase();
       req.body.faculty = "";
       if(req.body.department.length < 1) return responseHandler(res, 400, 'Wrong department');
     }
@@ -119,6 +119,7 @@ exports.updateSubject = async(req, res) => {
     })
     return responseHandler(res, 200, 'Success', updateData)
   }catch(err){
+    console.log(err)
     return responseHandler(res, 500, err);
   }
 }
