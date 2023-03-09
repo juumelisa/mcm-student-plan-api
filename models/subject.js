@@ -21,10 +21,23 @@ const Subject = sequelize.define('subject', {
     allowNull: false,
     validate: {
       notNull: {
-        msg: 'Student ID cannot be null!',
+        msg: 'Name cannot be null!',
       },
       notEmpty: {
-        msg: 'Student ID cannot be empty!',
+        msg: 'Name cannot be empty!',
+      },
+    },
+  },
+  subjectLevel: {
+    type: Sequelize.STRING,
+    unique: false,
+    allowNull: false,
+    validate: {
+      notNull: {
+        msg: 'subjectLevel cannot be null!',
+      },
+      notEmpty: {
+        msg: 'subjectLevel cannot be empty!',
       },
     },
   }

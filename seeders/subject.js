@@ -3,9 +3,9 @@ const Subject = require("../models/subject")
 const subjects = async() => {
   const subject = await Subject.findAll();
   const seedRole = [
-    { code: 'MT001',  name: 'Kalkulus I' },
-    { code: 'MT002', name: 'Kalkulus II' },
-    { code: 'MT002', name: 'Aljabar Linear Elementer' },
+    { code: 'MT001',  name: 'Kalkulus I', subjectLevel: 'University' },
+    { code: 'MT002', name: 'Kalkulus II', subjectLevel: 'Faculty' },
+    { code: 'MT003', name: 'Aljabar Linear Elementer', subjectLevel: 'Department' },
   ];
 
   if (subject.length === 0) {
