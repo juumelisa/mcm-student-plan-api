@@ -11,7 +11,7 @@ exports.verifyUser = async(req, res, next) => {
       req.user = payload;
       console.log(payload);
       console.log(new Date().getTime())
-      if(!payload || !payload.isAdmin) return responseHandler(res, 403, 'Unauthorized')
+      if(!payload) return responseHandler(res, 403, 'Unauthorized')
       if(payload.TTL < new Date().getTime()/1000) return responseHandler(res, 403, 'Expired session');
       return next();
     }

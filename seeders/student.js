@@ -3,8 +3,8 @@ const Student = require("../models/student")
 const students = async() => {
   const student = await Student.findAll();
   const seedStudent = {
-    student_id: 12192008,
-    full_name: 'Emma Watson',
+    studentId: 12192008,
+    fullName: 'Emma Watson',
     major: 'Matematika',
     email: 'emmawatson@email.com',
     password: 'Emma12192008'

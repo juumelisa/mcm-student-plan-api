@@ -4,7 +4,7 @@ const Student = require('./student');
 const Subject = require('./subject');
 
 const StudentPlan = sequelize.define('studyPlan', {
-  student_id: {
+  studentId: {
     type: Sequelize.INTEGER,
     allowNull: false,
     validate: {
@@ -16,7 +16,7 @@ const StudentPlan = sequelize.define('studyPlan', {
       },
     }
   },
-  subject_code: {
+  subjectCode: {
     type: Sequelize.STRING,
     allowNull: false,
     validate: {
@@ -31,12 +31,12 @@ const StudentPlan = sequelize.define('studyPlan', {
 })
 
 StudentPlan.belongsTo(Student, {
-  foreignKey: 'student_id',
+  foreignKey: 'studentId',
   allowNull: false
 })
 
 StudentPlan.belongsTo(Subject, {
-  foreignKey: 'subject_code',
+  foreignKey: 'subjectCode',
   allowNull: false
 })
 

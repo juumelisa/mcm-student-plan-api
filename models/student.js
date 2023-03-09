@@ -2,7 +2,7 @@ const Sequelize = require('sequelize');
 const sequelize = require('../helpers/sequelize');
 
 const Student = sequelize.define('student', {
-  student_id: {
+  studentId: {
     type: Sequelize.INTEGER,
     unique: true,
     allowNull: false,
@@ -16,7 +16,7 @@ const Student = sequelize.define('student', {
       },
     }
   },
-  full_name: {
+  fullName: {
     type: Sequelize.STRING,
     unique: false,
     allowNull: false,
