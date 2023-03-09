@@ -89,7 +89,7 @@ API ready at http://localhost:3000
 
 ## Documentation
 
-<!-- [Documentation](http://linktodocumentation) -->
+[POSTMAN COLLECTION](https://www.dropbox.com/s/431ufwvl3fqutyv/MCM.postman_collection.json?dl=0)
 
 ## Admin Section
 ### Login
