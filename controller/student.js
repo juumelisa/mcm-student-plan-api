@@ -57,3 +57,20 @@ exports.addStudent = async(req, res) => {
     return responseHandler(res, 500, err);
   }
 }
+
+exports.deleteStudent = async(req, res) => {
+  try{
+    if(!req.user.isAdmin) return responseHandler(res, 403, 'Unauthorized')
+    const { id } = req.params;
+    const studentData = await Student.findByPk(parseInt(id));
+    if(!studentData) return responseHandler(res, 404, 'Data not found');
+    await Student.destroy({
+      where: {
+        studentId: id
+      }
+    })
+    return responseHandler(res, 200, 'Success');
+  }catch(err){
+    return responseHandler(res, 500, err);
+  }
+}
